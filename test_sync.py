@@ -20,7 +20,7 @@ def create_test_video(output_path, duration=10, audio_delay=0.0):
         "-c:v", "libx264", "-c:a", "aac",
         output_path,
     ]
-    subprocess.run(cmd, check=True, capture_output=True)
+    subprocess.run(cmd, check=True, capture_output=True)ы
 
 def main():
     print("=" * 60)
