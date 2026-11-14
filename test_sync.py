@@ -10,17 +10,21 @@ import subprocess
 from pathlib import Path
 
 
-def create_test_video(output_path, duration=10, audio_delay=0.0):
-    """Создаёт видео с задержкой аудио."""
+def create_test_video(output_path: str, duration: int = 10, audio_delay: float = 0.0) -> None:
+    """Создаёт тестовое видео с задержкой аудио."""
+    # Мы делаем видео длиной duration + audio_delay
+    # Чтобы сигнал не обрезался
+    total_duration = duration + audio_delay
+    
     cmd = [
         "ffmpeg", "-y",
-        "-f", "lavfi", "-i", f"testsrc=duration={duration + audio_delay}:size=320x240:rate=30",
+        "-f", "lavfi", "-i", f"testsrc=duration={total_duration}:size=320x240:rate=30",
         "-f", "lavfi", "-i", f"sine=frequency=440:duration={duration}",
         "-af", f"adelay={int(audio_delay*1000)}|{int(audio_delay*1000)}",
         "-c:v", "libx264", "-c:a", "aac",
         output_path,
     ]
-    subprocess.run(cmd, check=True, capture_output=True)ы
+    subprocess.run(cmd, check=True, capture_output=True)
 
 def main():
     print("=" * 60)
@@ -47,11 +51,27 @@ def main():
         "uploads/cam3.mp4",
     ])
     
-    # 3. Результат
+       # 3. Результат
     print("\n" + "=" * 60)
-    print(f"✅ Сдвиги (в сэмплах): {shifts}")
-    print(f"✅ Сдвиги (в секундах): {[s / 16000 for s in shifts]}")
+    print(f"✅ Сдвиги (сэмплы): {shifts['shifts_samples']}")
+    print(f"✅ Сдвиги (сек): {shifts['shifts_seconds']}")
+    print(f"✅ Файл сохранён: output/sync_result.json")
     print("=" * 60)
+
+        # 4. Выравнивание
+    print("\n🔄 Выравнивание видео...")
+    from app.services.sync import align_videos
+    
+    aligned = align_videos(
+        ["uploads/cam1.mp4", "uploads/cam2.mp4", "uploads/cam3.mp4"],
+        shifts["shifts_samples"]
+    )
+    
+    print(f"✅ Выровнено видео: {len(aligned)}")
+    for path in aligned:
+        print(f"  - {path}")
+
+
     
     # 4. Проверка
     print("\n📊 Проверка:")
