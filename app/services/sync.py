@@ -7,7 +7,8 @@
 import logging
 import subprocess
 from pathlib import Path
-from typing import List, Any
+from typing import List
+from tqdm import tqdm
 
 import numpy as np
 
@@ -37,10 +38,14 @@ def load_audio(audio_path: str) -> np.ndarray:
     
     return audio.astype(np.float32)
 
-def find_shift(audio1: np.ndarray, audio2: np.ndarray) -> int:
-    """Находит сдвиг audio2 относительно audio1."""
-    corr = np.correlate(audio1, audio2, mode="full")
-    shift = int(np.argmax(corr) - len(audio2) + 1)
+def find_shift(audio1: np.ndarray, audio2: np.ndarray, max_seconds: int = 300) -> int:
+    """Находит сдвиг audio2 относительно audio1 (по первым N секундам)."""
+    max_samples = 16000 * max_seconds
+    a1 = audio1[:max_samples]
+    a2 = audio2[:max_samples]
+    
+    corr = np.correlate(a1, a2, mode="full")
+    shift = int(np.argmax(corr) - len(a2) + 1)
     return shift
 
 def sync_videos(video_paths: List[str], output_dir: str = "output") -> List[int]:
@@ -49,20 +54,19 @@ def sync_videos(video_paths: List[str], output_dir: str = "output") -> List[int]
 
     # 1. Извлечь аудио
     audio_paths = []
-    for i, video in enumerate(video_paths):
-        audio_path =  f"{output_dir}/audio_{i}.wav"
+    for i, video in enumerate(tqdm(video_paths, desc="Извлечение аудио")):
+        audio_path = f"{output_dir}/audio_{i}.wav"
         extract_audio(video, audio_path)
         audio_paths.append(audio_path)
-    
-    # 2. Загрузить аудио
-    audios = [load_audio(p) for p in audio_paths]
 
-    # 3. Сдвиги относительно первого
-    shifts = [0]  # первый — эталон
-    for audio in audios[1:]:
+    # 2. Загрузить аудио
+    audios = [load_audio(p) for p in tqdm(audio_paths, desc="Загрузка аудио")]
+
+    # 3. Сдвиги
+    shifts = [0]
+    for i, audio in enumerate(tqdm(audios[1:], desc="Синхронизация", total=len(audios)-1), start=1):
         shift = find_shift(audios[0], audio)
         shifts.append(shift)
-    
     logger.info(f"Сдвиги: {shifts}")
     return shifts
 
