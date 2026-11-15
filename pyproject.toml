@@ -1,0 +1,93 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multicam-ai-editor"
+version = "0.3.0"
+description = "Local AI multicam editor: sync, diarization, speaker identification via RAG"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "RAGineerAI" },
+]
+
+# Базовые зависимости — нужны ВСЕГДА, независимо от модуля.
+# Модуль-специфичные — в [project.optional-dependencies] ниже.
+dependencies = [
+    "numpy>=2.0.0",
+    "scipy>=1.13.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+# v0.3: диаризация через pyannote.
+# torch/torchaudio устанавливаются ОТДЕЛЬНО под вашу CUDA (см. README).
+diarization = [
+    "pyannote.audio>=3.3.0",
+    "torch>=2.5.0",
+    "torchaudio>=2.5.0",
+    "tqdm>=4.66.0",
+]
+
+# v0.4: эмбеддинги + Qdrant.
+embeddings = [
+    "wespeaker>=0.4.0",
+    "qdrant-client>=1.12.0",
+]
+
+# v0.6: транскрипция.
+whisper = [
+    "faster-whisper>=1.0.0",
+]
+
+# v0.9: веб-интерфейс.
+api = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "jinja2>=3.1.0",
+    "python-multipart>=0.0.12",
+]
+
+# Инструменты разработки.
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "ruff>=0.7.0",
+    "mypy>=1.13.0",
+]
+
+[project.scripts]
+# CLI-команда: multicam-diarize --audio X.wav --num-speakers 2
+multicam-diarize = "app.cli.diarize:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+# Маркеры: slow-тесты (требуют GPU/HF_TOKEN) не запускаются по умолчанию.
+markers = [
+    "slow: marks tests as slow (require GPU / HF_TOKEN)",
+]
+# По умолчанию — только быстрые тесты.
+addopts = "-m 'not slow'"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+# E — pycodestyle errors, F — pyflakes, I — isort, W — warnings,
+# UP — pyupgrade (современный синтаксис), B — bugbear (типичные баги)
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true  # pyannote/torch не имеют полных стабов

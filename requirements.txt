@@ -1,3 +1,16 @@
+# ==============================================================================
+# LEGACY-ФАЙЛ. Устанавливает ВСЕ зависимости разом (для быстрого старта).
+#
+# Для разработки используйте pyproject.toml с extras:
+#   pip install -e ".[diarization]"      # v0.3: диаризация
+#   pip install -e ".[dev]"              # тесты + линтеры
+#   pip install -e ".[diarization,dev]"  # и то, и другое
+#
+# ВНИМАНИЕ: torch/torchaudio устанавливаются ОТДЕЛЬНО под вашу CUDA:
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
+# Проверьте версию CUDA: nvidia-smi
+# ==============================================================================
+
 # FastAPI
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
@@ -17,6 +30,8 @@ pyannote.audio>=3.3.0
 
 # Утилиты
 numpy>=2.0.0
+scipy>=1.13.0
+tqdm>=4.66.0
 pydantic>=2.9.0
 pydantic-settings>=2.6.0
 python-dotenv>=1.0.0

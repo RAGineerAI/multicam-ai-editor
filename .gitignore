@@ -1,13 +1,45 @@
-venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.venv/
+venv/
+env/
+ENV/
+
+# Тесты / кэш
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ML модели (скачиваются заново, ~3-4 GB)
+models/
+.cache/huggingface/
+
+# Runtime-артефакты
+output/
+uploads/
+
+# Environment (НИКОГДА не коммитим секреты)
 .env
-*.log
-uploads/*
-output/*
-models/*
-!uploads/.gitkeep
-!output/.gitkeep
-!models/.gitkeep
-.DS_Store
+.env.local
+.env.*.local
+
+# IDE
 .vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Логи
+*.log
+logs/
