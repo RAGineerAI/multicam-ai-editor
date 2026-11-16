@@ -1,0 +1,1 @@
+"""Тесты multicam-ai-editor."""
