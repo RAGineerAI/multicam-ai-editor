@@ -1,0 +1,1 @@
+"""CLI-команды multicam-ai-editor."""
